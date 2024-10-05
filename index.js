@@ -39,6 +39,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(checkForAuthenticationCookie("token"));
+
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/item-uploads', express.static(path.join(__dirname, 'item-uploads')));
 app.use('/coverImage-uploads', express.static(path.join(__dirname, 'coverImage-uploads')));
