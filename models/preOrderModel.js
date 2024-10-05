@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
 const preOrderFoodSchema = new mongoose.Schema({
-  preOrderId: {
-    type: String,
-    unique: true, // Ensure this field is unique
-    default: () => new mongoose.Types.ObjectId() // Or generate a custom ID
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-
+  chefId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Chef',
+    required: true // Ensure a chef is assigned
+  },
   name: {
     type: String,
     required: true
@@ -18,28 +22,20 @@ const preOrderFoodSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    min: 1 // minimum quantity should be 1
-  },
-  priceRange: {
-    minPrice: {
-      type: Number,
-      required: true,
-      min: 0 // minimum price should be 0
-    },
-    maxPrice: {
-      type: Number,
-      required: true,
-      validate: {
-        validator: function (value) {
-          return value >= (this.minPrice || 0); // Fallback to 0 if minPrice is undefined
-        },
-        message: 'Max price must be greater than or equal to min price.'
-      }
-    }
+    min: 1
   },
   deliveryDate: {
     type: Date,
     required: true
+  },
+  price: {
+    type: Number, // Price decided by the chef
+    default: null // Initially null until the chef sets it
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'accepted', 'declined'], // Status of the pre-order
+    default: 'pending'
   },
   createdAt: {
     type: Date,

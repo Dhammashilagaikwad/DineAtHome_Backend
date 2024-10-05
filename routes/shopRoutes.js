@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const shopController = require('../controllers/shopController');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' }); // Temporary storage
+const upload = multer({ dest: 'shop-uploads/' }); // Temporary storage
 
 // Add a new item
 // router.post('/additems', shopController.addItem);

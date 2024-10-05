@@ -1,4 +1,5 @@
 const Chef = require('../models/Chef');
+const PreOrderFood = require('../models/preOrderModel')
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -16,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'DinneAppSecret';
 // Set up multer storage for cover images
 const coverImageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'coverImage-uploads/'); // New folder for item images
+        cb(null, 'public/coverImage-uploads/'); // New folder for item images
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -35,6 +36,29 @@ const coverImageStorage = multer.diskStorage({
   // Multer middleware for handling item images
   const uploadCoverImage = multer({ storage: coverImageStorage, fileFilter: coverImageFileFilter });
 
+
+
+// Set up multer storage for profile photos
+const profilePhotoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/profilephoto/'); // Store in public/profilephoto folder
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+// Multer middleware for handling profile photo upload
+const uploadProfilePhoto = multer({ 
+    storage: profilePhotoStorage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Not an image! Please upload an image.'), false);
+        }
+    }
+});
 
 
 
@@ -164,6 +188,55 @@ const editChefProfile = async (req, res) => {
 };
 
 
+// Handle pre-order acceptance by chef
+const acceptPreOrder = async (req, res) => {
+    const { preOrderId, price } = req.body; // Extracting preOrderId and price from the request body
+
+    try {
+        const preOrder = await PreOrderFood.findById(preOrderId); // Find the pre-order by ID
+
+        if (!preOrder) {
+            return res.status(404).json({ message: "Pre-order not found" }); // Handle not found case
+        }
+
+        // Update the pre-order status and price if found
+        preOrder.status = "accepted"; // Assuming you have a status field
+        if (price) {
+            preOrder.price = price; // Update price if provided
+        }
+        
+        await preOrder.save(); // Save the updated pre-order
+
+        res.status(200).json({ message: "Pre-order accepted successfully." });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error accepting pre-order" });
+    }
+};
+
+
+// Handle pre-order rejection by chef
+const declinePreOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const preOrder = await PreOrderFood.findById(id);
+        if (!preOrder) {
+            return res.status(404).json({ message: 'Pre-order not found' });
+        }
+
+        // Update status to declined
+        preOrder.status = 'declined';
+        await preOrder.save();
+
+        // Notify the user about the decline (implement notification logic as needed)
+
+        res.status(200).json({ message: 'Pre-order declined', preOrder });
+    } catch (error) {
+        console.error('Error declining pre-order:', error);
+        res.status(500).json({ message: 'Error declining pre-order: ' + error.message });
+    }
+};
 
 
 const logoutChef = (req, res) => {
@@ -204,7 +277,10 @@ module.exports = {
     editChefProfile,
     logoutChef,        // Export logout function
     deleteAccount,
-    uploadCoverImage
+    acceptPreOrder,
+    declinePreOrder,
+    uploadCoverImage, 
+    uploadProfilePhoto
 };
 
 
