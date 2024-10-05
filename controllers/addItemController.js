@@ -8,7 +8,7 @@ const path = require('path');
 // Set up multer storage for item images
 const itemStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-      cb(null, 'item-uploads/'); // New folder for item images
+      cb(null, 'public/item-uploads/'); // New folder for item images
   },
   filename: (req, file, cb) => {
       cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
