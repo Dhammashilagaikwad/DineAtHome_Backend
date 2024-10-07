@@ -117,7 +117,7 @@ const getItemByName = async (req, res) => {
 const addItemByChefId = async (req, res) => {
     const { itemname, description, price, image, quantity = 0, unit = '' } = req.body;
 
-    // Validate input data
+    // Validate input data 
     if (!itemname || !description || price < 0 || quantity < 0) {
         return res.status(400).json({ message: "Invalid input" });
     }

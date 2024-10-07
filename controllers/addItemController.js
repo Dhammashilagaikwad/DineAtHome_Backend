@@ -28,14 +28,16 @@ const itemFileFilter = (req, file, cb) => {
 const uploadItemImage = multer({ storage: itemStorage, fileFilter: itemFileFilter });
 
 // Get all items
+// Get all items with populated chef data
 const getAllItem = async (req, res) => {
   try {
-    const items = await Item.find();
+    const items = await Item.find().populate('chefId', 'name'); // Populate chefId with chef's name
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching items', error });
   }
 };
+
 
 // Get item by ID
 const getItemById = async (req, res) => {
