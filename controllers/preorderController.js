@@ -1,16 +1,24 @@
 const PreOrderFood = require("../models/preOrderModel");
-const User = require("../models/userModel");
+const User = require("../models/userModel")
 const Chef = require("../models/Chef");
 
 // Get all pre-orders
 const getPreOrder = async (req, res) => {
   try {
-    const preOrders = await PreOrderFood.find().populate('userId chefId');
+    const userId = req.user._id ||  req.user.id ; // Assuming you're using middleware to set req.user based on JWT
+    const preOrders = await PreOrderFood.find({ userId })
+    .populate('userId', 'username email') // Populate userId with selected fields from User
+      .populate('chefId', 'name experience');
+      
+    if (preOrders.length === 0) {
+      return res.status(404).json({ message: "No pre-orders available." });
+    }
     res.json(preOrders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching pre-orders: " + error.message });
   }
 };
+
 
 // Get a specific pre-order by ID
 const getPreOrderById = async (req, res) => {

@@ -5,7 +5,7 @@ const { authenticateUser } = require('../services/authentication');
 const router = Router();
 router.use(authenticateUser);
 
-router.get('/get-preOrder', getPreOrder);
+router.get('/get-preOrder',authenticateUser, getPreOrder);
 router.get('/get-preOrder/:id', getPreOrderById);
 router.post('/add-preOrder', authenticateUser, postPreOrder);
 router.put('/edit-preOrder/:id', editPreOrder);
