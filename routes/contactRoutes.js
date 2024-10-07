@@ -4,7 +4,7 @@ const { Router } = require("express");
 const router = Router();
 const {getAllContacts, getContactById, editContact, deleteContact, postContact} = require('../controllers/contactController');
 
-router.get('/contact-us',getAllContacts);
+router.get('/get-contact-us',getAllContacts);
 router.get('/contact-us/:id',getContactById);
 
 router.put('/editContact/:id',editContact);
