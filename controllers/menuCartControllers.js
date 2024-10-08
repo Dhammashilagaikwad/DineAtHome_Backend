@@ -44,7 +44,7 @@ const getUserMenuCart = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
-
+    console.log('Populated Cart:', cart); // Debugging
     res.status(200).json(cart);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching menu cart', error });
