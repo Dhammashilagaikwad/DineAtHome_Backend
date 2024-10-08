@@ -1,5 +1,6 @@
 const Cart = require('../models/cartModel');
 const Shop = require('../models/shop');
+
 const { authenticateUser } = require('../services/authentication');
 
 // Calculate total price for cart
@@ -70,7 +71,12 @@ exports.addToCart = async (req, res) => {
 exports.getCart = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;
-        const cart = await Cart.findOne({ user: userId }).populate('items.item');
+        const cart = await Cart.findOne({ user: userId }).populate({
+            path: 'items.item', // Populate 'item' field
+            select: 'itemname chefname price image', // Select required fields
+           
+
+        });
 
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });

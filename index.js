@@ -47,6 +47,7 @@ app.use('/coverImage-uploads', express.static(path.join(__dirname, 'coverImage-u
 
 
 
+
 // Example route
 app.get('/', (req, res) => {
   res.status(200).json({ status: true, message: "Your message submitted successfully" });
