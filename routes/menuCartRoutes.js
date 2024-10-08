@@ -9,7 +9,7 @@ const {
 
 // Routes
 router.post('/addToMenuCart', authenticateUser, addItemToMenuCart);
-router.get('/userMenuCart/:userId', authenticateUser,  getUserMenuCart);
+router.get('/userMenuCart', authenticateUser,  getUserMenuCart);
 router.delete('/removeFromMenuCart', authenticateUser, removeItemFromMenuCart);
 
 module.exports = router;

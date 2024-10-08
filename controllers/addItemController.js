@@ -54,7 +54,8 @@ const getItemById = async (req, res) => {
 
 // Post new item without chef association
 const postItem = async (req, res) => {
-  const { foodPhoto, foodName, foodDescription, amount } = req.body;
+  const {  foodName, foodDescription, amount } = req.body;
+  const foodPhoto = req.file ? `/item-uploads/${req.file.filename}` : '';
 
   try {
     const existingItem = await Item.findOne({ foodName });
