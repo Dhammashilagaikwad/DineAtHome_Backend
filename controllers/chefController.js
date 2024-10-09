@@ -190,33 +190,36 @@ const editChefProfile = async (req, res) => {
 
 // Handle pre-order acceptance by chef
 const acceptPreOrder = async (req, res) => {
-    const { preOrderId, price } = req.body; // Extracting preOrderId and price from the request body
+    const chefId = req.user._id || req.user.id;  // Assuming the chef's ID is in the token
+    const preOrderId = req.params.id;  // Extract the pre-order ID from URL parameters
+    const { price } = req.body;  // Extract price from the request body
 
     try {
-        const preOrder = await PreOrderFood.findById(preOrderId); // Find the pre-order by ID
+        // Find the pre-order by ID
+        const preOrder = await PreOrderFood.findById(preOrderId);
 
         if (!preOrder) {
-            return res.status(404).json({ message: "Pre-order not found" }); // Handle not found case
+            return res.status(404).json({ message: "Pre-order not found" });  // Handle pre-order not found
         }
 
-        // Update the pre-order status and price if found
-        preOrder.status = "accepted"; // Assuming you have a status field
-        if (price) {
-            preOrder.price = price; // Update price if provided
+        // Ensure only the chef who received the pre-order can accept it
+        if (!preOrder.chefId.equals(chefId)) {
+            return res.status(403).json({ message: "Not authorized to accept this pre-order" });
         }
 
-        await preOrder.save(); // Save the updated pre-order
+        // Validate price
+        if (!price || price <= 0) {
+            return res.status(400).json({ message: 'Price must be a valid number greater than 0' });
+        }
 
-        // Update the chef's order history
-        // Update in acceptPreOrder
-        await Chef.findByIdAndUpdate(
-            req.params.id,
-            { $push: { orderHistory: { preOrderId, status: "accepted", date: Date.now(), updatedAt: Date.now(), price: price } } }, // Add new history
-            { new: true }
-        );
+        // Update pre-order status and price
+        preOrder.price = price;
+        preOrder.status = "accepted";
 
+        // Save the updated pre-order
+        await preOrder.save();
 
-        res.status(200).json({ message: "Pre-order accepted successfully." });
+        res.status(200).json({ message: "Pre-order accepted and price set successfully", preOrder });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error accepting pre-order" });
