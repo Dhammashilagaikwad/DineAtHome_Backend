@@ -23,7 +23,17 @@ const chefSchema = new mongoose.Schema({
     landmark: { type: String, required: true },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
-    is_active: { type: Boolean, default: true }
+    is_active: { type: Boolean, default: true },
+    orderHistory: [{
+        orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+        preOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'PreOrderFood' },
+        status: { type: String, enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Accepted', 'Declined', 'Pre-Order'], required: true },
+        date: { type: Date, default: Date.now },
+        price: { type: Number, required: false }, // Track price at the time of order
+        customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Link to the user who made the order
+    }]
+    
+    
 });
 
 // Pre-save hook to hash the password before saving it to the database

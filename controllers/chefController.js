@@ -22,19 +22,19 @@ const coverImageStorage = multer.diskStorage({
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
     }
-  });
-  
-  // File filter for image validation
-  const coverImageFileFilter = (req, file, cb) => {
+});
+
+// File filter for image validation
+const coverImageFileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
     } else {
         cb(new Error('Not an image! Please upload an image.'), false);
     }
-  };
-  
-  // Multer middleware for handling item images
-  const uploadCoverImage = multer({ storage: coverImageStorage, fileFilter: coverImageFileFilter });
+};
+
+// Multer middleware for handling item images
+const uploadCoverImage = multer({ storage: coverImageStorage, fileFilter: coverImageFileFilter });
 
 
 
@@ -49,7 +49,7 @@ const profilePhotoStorage = multer.diskStorage({
 });
 
 // Multer middleware for handling profile photo upload
-const uploadProfilePhoto = multer({ 
+const uploadProfilePhoto = multer({
     storage: profilePhotoStorage,
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
@@ -151,7 +151,7 @@ const getMenuItemsForChef = async (req, res) => {
 const editChefProfile = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, cuisine, specialities } = req.body; 
+        const { name, cuisine, specialities } = req.body;
         const trimmedId = id.trim();
 
         // Validate the trimmed ID
@@ -161,26 +161,26 @@ const editChefProfile = async (req, res) => {
 
         const updates = req.body;
 
-        
 
-            // If req.file exists, add the coverImage to updates
-            if (req.file) {
-                updates.coverImage = req.file.filename;
-            }
 
-            // Check if specialities are being sent
-            if (Array.isArray(req.body.specialities)) {
-                updates.specialities = req.body.specialities; // Set specialities to the incoming array
-            }
+        // If req.file exists, add the coverImage to updates
+        if (req.file) {
+            updates.coverImage = req.file.filename;
+        }
 
-            // Update the chef profile
-            const updatedChef = await Chef.findByIdAndUpdate(trimmedId, updates, { new: true });
-            if (!updatedChef) {
-                return res.status(404).json({ message: 'Chef not found' });
-            }
+        // Check if specialities are being sent
+        if (Array.isArray(req.body.specialities)) {
+            updates.specialities = req.body.specialities; // Set specialities to the incoming array
+        }
 
-            res.status(200).json({ message: 'Profile updated successfully', chef: updatedChef });
-        
+        // Update the chef profile
+        const updatedChef = await Chef.findByIdAndUpdate(trimmedId, updates, { new: true });
+        if (!updatedChef) {
+            return res.status(404).json({ message: 'Chef not found' });
+        }
+
+        res.status(200).json({ message: 'Profile updated successfully', chef: updatedChef });
+
     } catch (err) {
         console.error('Error updating profile:', err);
         res.status(500).json({ message: 'Error updating profile: ' + err.message });
@@ -204,8 +204,17 @@ const acceptPreOrder = async (req, res) => {
         if (price) {
             preOrder.price = price; // Update price if provided
         }
-        
+
         await preOrder.save(); // Save the updated pre-order
+
+        // Update the chef's order history
+        // Update in acceptPreOrder
+        await Chef.findByIdAndUpdate(
+            req.params.id,
+            { $push: { orderHistory: { preOrderId, status: "accepted", date: Date.now(), updatedAt: Date.now(), price: price } } }, // Add new history
+            { new: true }
+        );
+
 
         res.status(200).json({ message: "Pre-order accepted successfully." });
     } catch (err) {
@@ -228,6 +237,13 @@ const declinePreOrder = async (req, res) => {
         // Update status to declined
         preOrder.status = 'declined';
         await preOrder.save();
+
+        // Update the chef's order history
+        await Chef.findByIdAndUpdate(
+            preOrder.chefId, // Assuming the pre-order has a chefId field
+            { $push: { orderHistory: { preOrderId: id, status: "declined" } } },
+            { new: true }
+        );
 
         // Notify the user about the decline (implement notification logic as needed)
 
@@ -267,19 +283,36 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+// Get order history for a specific chef
+const getOrderHistory = async (req, res) => {
+    try {
+        const chefId = req.params.id;
+        const chef = await Chef.findById(chefId).populate('orderHistory.preOrderId').populate('orderHistory.customerId');
 
-module.exports = { 
-    getChefs, 
+        if (!chef) return res.status(404).json({ message: 'Chef not found' });
+
+        // Sending the orderHistory which should contain the necessary populated fields
+        res.status(200).json(chef.orderHistory);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching order history: ' + err.message });
+    }
+};
+
+
+
+module.exports = {
+    getChefs,
     signUpChef,  // Export signup function
     loginChef,     // Export login function
-    getChefById, 
-    getMenuItemsForChef, 
+    getChefById,
+    getMenuItemsForChef,
     editChefProfile,
     logoutChef,        // Export logout function
     deleteAccount,
     acceptPreOrder,
     declinePreOrder,
-    uploadCoverImage, 
+    getOrderHistory,
+    uploadCoverImage,
     uploadProfilePhoto
 };
 
