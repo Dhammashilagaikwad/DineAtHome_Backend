@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const { authenticateUser } = require('../services/authentication');
 const { getChefs, addChef, getChefById, getMenuItemsForChef, signUpChef, loginChef, editChefProfile, logoutChef, deleteAccount ,uploadCoverImage,acceptPreOrder,declinePreOrder} = require('../controllers/chefController');
 
 // Define routes
@@ -29,7 +29,7 @@ router.delete('/delete-account', deleteAccount); // Delete account
 router.put('/:id', uploadCoverImage.single('coverImage'),editChefProfile);
 
 // Route to accept a pre-order
-router.put('/:id/preorder/accept', acceptPreOrder); // Accept pre-order
+router.put('/:id/preorder/accept',authenticateUser, acceptPreOrder); // Accept pre-order
 
 // Route to decline a pre-order
 router.put('/:id/preorder/decline', declinePreOrder); // Decline pre-order
