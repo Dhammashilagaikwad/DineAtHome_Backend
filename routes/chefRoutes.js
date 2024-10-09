@@ -34,5 +34,9 @@ router.put('/:id/preorder/accept',authenticateUser, acceptPreOrder); // Accept p
 // Route to decline a pre-order
 router.put('/:id/preorder/decline', declinePreOrder); // Decline pre-order
 
+// Route in chefRoutes.js
+router.get('/:id/order-history', getOrderHistory); // Get chef's order history
+
+
 module.exports = router;
 
