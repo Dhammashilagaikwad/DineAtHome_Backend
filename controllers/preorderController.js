@@ -5,19 +5,36 @@ const Chef = require("../models/Chef");
 // Get all pre-orders
 const getPreOrder = async (req, res) => {
   try {
-    const userId = req.user._id ||  req.user.id ; // Assuming you're using middleware to set req.user based on JWT
-    const preOrders = await PreOrderFood.find({ userId })
-    .populate('userId', 'username email') // Populate userId with selected fields from User
-      .populate('chefId', 'name experience');
-      
-    if (preOrders.length === 0) {
+    const userId = req.user._id || req.user.id; // Assuming you're using middleware to set req.user based on JWT
+    const chefId = req.user._id || req.user.id; // Assuming the chef is also authenticated similarly
+
+    // Check if the request is for a user or a chef
+    let preOrders;
+
+    if (req.user.role === 'user') {
+      // If the request is for a user, find pre-orders by userId
+      preOrders = await PreOrderFood.find({ userId })
+        .populate('userId', 'username email') // Populate userId with selected fields from User
+        .populate('chefId', 'name experience');
+    } else if (req.user.role === 'chef') {
+      // If the request is for a chef, find pre-orders by chefId
+      preOrders = await PreOrderFood.find({ chefId })
+        .populate('userId', 'username email') // Populate userId with selected fields from User
+        .populate('chefId', 'name experience');
+    }
+
+    // If no pre-orders are found, return an appropriate message
+    if (!preOrders || preOrders.length === 0) {
       return res.status(404).json({ message: "No pre-orders available." });
     }
+
+    // Return the found pre-orders
     res.json(preOrders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching pre-orders: " + error.message });
   }
 };
+
 
 
 // Get a specific pre-order by ID
@@ -68,30 +85,36 @@ const postPreOrder = async (req, res) => {
 
 // Update a pre-order by ID
 const editPreOrder = async (req, res) => {
-  const userId = req.user._id; // Assuming user ID is stored in the request object after authentication
-
+  const chefId = req.user._id || req.user.id; // Assuming the chef's ID is in the decoded token
+  console.log(req.user);
   try {
     const preOrder = await PreOrderFood.findById(req.params.id);
-    
-    if (!preOrder) return res.status(404).json({ message: 'Pre-order not found' });
-    if (!preOrder.userId.equals(userId)) {
-      return res.status(403).json({ message: 'Not authorized to edit this pre-order' });
+
+    if (!preOrder) {
+      return res.status(404).json({ message: 'Pre-order not found' });
     }
 
-    const { name, description, quantity, deliveryDate } = req.body;
+    // Ensure only the chef who received the pre-order can update it
+    if (!preOrder.chefId.equals(chefId)) {
+      return res.status(403).json({ message: 'Not authorized to update price for this pre-order' });
+    }
 
-    // Update fields only if they are provided
-    if (name) preOrder.name = name;
-    if (description) preOrder.description = description;
-    if (quantity) preOrder.quantity = quantity;
-    if (deliveryDate) preOrder.deliveryDate = deliveryDate;
+    const { price } = req.body;
+
+    if (!price || price <= 0) {
+      return res.status(400).json({ message: 'Price must be a valid number greater than 0' });
+    }
+
+    preOrder.price = price;
+    preOrder.status = 'accepted';
 
     const updatedPreOrder = await preOrder.save();
-    res.json({ message: "Pre-order updated successfully", updatedPreOrder });
+    res.json({ message: 'Pre-order accepted and price set successfully', updatedPreOrder });
   } catch (error) {
-    res.status(400).json({ message: "Error updating pre-order: " + error.message });
+    res.status(500).json({ message: 'Error updating pre-order: ' + error.message });
   }
 };
+
 
 // Delete a pre-order by ID
 const deletePreOrderById = async (req, res) => {
