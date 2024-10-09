@@ -32,11 +32,27 @@ const uploadItemImage = multer({ storage: itemStorage, fileFilter: itemFileFilte
 const getAllItem = async (req, res) => {
   try {
     const items = await Item.find().populate('chefId', 'name'); // Populate chefId with chef's name
-    res.status(200).json(items);
+
+    // Log each item's foodPhoto before modification
+    items.forEach(item => {
+      console.log(`Original Food Photo for ${item.foodName}: ${item.foodPhoto}`);
+    });
+
+    // Adjust foodPhoto path before sending the response
+    const updatedItems = items.map(item => ({
+      ...item.toObject(),
+      foodPhoto: item.foodPhoto ? `/item-uploads/${item.foodPhoto.split('/item-uploads/')[1]}` : null,
+    }));
+
+    // Log the updated items to see the foodPhoto paths
+    console.log('Updated items with correct foodPhoto:', updatedItems);
+    res.status(200).json(updatedItems);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching items', error });
   }
 };
+
+
 
 
 // Get item by ID
@@ -82,7 +98,7 @@ const addItemByChef = async (req, res) => {
   
   const { chefId } = req.params; // Extract chefId from URL
   const { foodName, foodDescription, amount } = req.body;
-  const foodPhoto = req.file ? req.file.path : null; // Store file path
+  const foodPhoto = req.file ? `/item-uploads/${req.file.filename}` : '';
 
   if (!foodPhoto || !foodName || !foodDescription || !amount) {
     return res.status(400).json({ message: 'All fields (including image) are required' });
