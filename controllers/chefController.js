@@ -229,31 +229,32 @@ const acceptPreOrder = async (req, res) => {
 
 // Handle pre-order rejection by chef
 const declinePreOrder = async (req, res) => {
-    try {
-        const { id } = req.params;
+    const { chefId } = req.params;
+    const { preOrderId, price } = req.body;
 
-        const preOrder = await PreOrderFood.findById(id);
+    try {
+        // Find the chef
+        const chef = await Chef.findById(chefId);
+        if (!chef) {
+            return res.status(404).json({ message: 'Chef not found' });
+        }
+
+        // Find the pre-order inside the chef's order history
+        const preOrder = chef.orderHistory.find(order => order.preOrderId.toString() === preOrderId);
         if (!preOrder) {
             return res.status(404).json({ message: 'Pre-order not found' });
         }
 
-        // Update status to declined
+        // Update pre-order status to declined (if necessary)
         preOrder.status = 'declined';
-        await preOrder.save();
+        preOrder.price = price;
 
-        // Update the chef's order history
-        await Chef.findByIdAndUpdate(
-            preOrder.chefId, // Assuming the pre-order has a chefId field
-            { $push: { orderHistory: { preOrderId: id, status: "declined" } } },
-            { new: true }
-        );
+        // Save the updated chef document
+        await chef.save();
 
-        // Notify the user about the decline (implement notification logic as needed)
-
-        res.status(200).json({ message: 'Pre-order declined', preOrder });
-    } catch (error) {
-        console.error('Error declining pre-order:', error);
-        res.status(500).json({ message: 'Error declining pre-order: ' + error.message });
+        res.status(200).json({ message: 'Pre-order declined successfully', preOrder });
+    } catch (err) {
+        res.status(500).json({ message: 'Error declining pre-order: ' + err.message });
     }
 };
 
@@ -294,12 +295,12 @@ const getOrderHistory = async (req, res) => {
 
         if (!chef) return res.status(404).json({ message: 'Chef not found' });
 
-        // Sending the orderHistory which should contain the necessary populated fields
-        res.status(200).json(chef.orderHistory);
+        res.status(200).json(chef.orderHistory);  // Ensure that this includes the preOrderId.quantity
     } catch (err) {
         res.status(500).json({ message: 'Error fetching order history: ' + err.message });
     }
 };
+
 
 
 
