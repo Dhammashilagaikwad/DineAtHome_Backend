@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateUser } = require('../services/authentication');
-const { getChefs, addChef, getChefById, getMenuItemsForChef, signUpChef, loginChef, editChefProfile, logoutChef, deleteAccount ,uploadCoverImage,acceptPreOrder,declinePreOrder} = require('../controllers/chefController');
+const { getChefs, addChef, getChefById, getMenuItemsForChef, signUpChef, loginChef, editChefProfile, logoutChef, deleteAccount ,uploadCoverImage,acceptPreOrder,declinePreOrder,getOrderHistory} = require('../controllers/chefController');
 
 // Define routes
 router.get('/', getChefs); // Get all chefs
@@ -33,6 +33,10 @@ router.put('/:id/preorder/accept',authenticateUser, acceptPreOrder); // Accept p
 
 // Route to decline a pre-order
 router.put('/:id/preorder/decline', declinePreOrder); // Decline pre-order
+
+// Route in chefRoutes.js
+router.get('/:id/order-history', getOrderHistory); // Get chef's order history
+
 
 module.exports = router;
 
