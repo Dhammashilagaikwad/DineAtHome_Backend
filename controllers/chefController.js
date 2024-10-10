@@ -151,7 +151,7 @@ const getMenuItemsForChef = async (req, res) => {
 const editChefProfile = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, cuisine, specialities } = req.body;
+        const { name, cuisine, specialities, address1 } = req.body; // Add address1 to the destructuring
         const trimmedId = id.trim();
 
         // Validate the trimmed ID
@@ -159,9 +159,7 @@ const editChefProfile = async (req, res) => {
             return res.status(400).json({ message: 'Invalid chef ID' });
         }
 
-        const updates = req.body;
-
-
+        const updates = {};
 
         // If req.file exists, add the coverImage to updates
         if (req.file) {
@@ -169,8 +167,13 @@ const editChefProfile = async (req, res) => {
         }
 
         // Check if specialities are being sent
-        if (Array.isArray(req.body.specialities)) {
-            updates.specialities = req.body.specialities; // Set specialities to the incoming array
+        if (Array.isArray(specialities)) {
+            updates.specialities = specialities; // Set specialities to the incoming array
+        }
+
+        // Update address1 if it's provided
+        if (address1) {
+            updates.address1 = address1;
         }
 
         // Update the chef profile
