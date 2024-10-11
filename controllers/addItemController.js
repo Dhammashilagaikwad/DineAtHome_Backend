@@ -132,15 +132,21 @@ const addItemByChef = async (req, res) => {
 
 // Get items by chefId
 const getItemsByChefId = async (req, res) => {
+  const chefId = req.params.chefId;
+  console.log('Fetching items for chefId:', chefId); // Log the chefId
+
   try {
-    const chefId = req.params.chefId;
-    const items = await Item.find({ chefId }); // Fetch items using chefId reference
+    const items = await Item.find({ chefId });
+    if (!items) {
+      return res.status(404).json({ message: 'No items found for this chef' });
+    }
     res.status(200).json(items);
   } catch (error) {
     console.error("Error fetching items by chefId:", error);
     res.status(500).json({ message: 'Error fetching items', error });
   }
 };
+
 
 // Edit item by ID
 const editItem = async (req, res) => {
