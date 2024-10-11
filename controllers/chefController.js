@@ -166,6 +166,11 @@ const editChefProfile = async (req, res) => {
             updates.coverImage = req.file.filename;
         }
 
+ // Update cuisine if it's provided
+ if (cuisine) {
+    updates.cuisine = cuisine; // Add cuisine to updates
+}
+
         // Check if specialities are being sent
         if (Array.isArray(specialities)) {
             updates.specialities = specialities; // Set specialities to the incoming array
