@@ -49,34 +49,7 @@ const getItemById = async (req, res) => {
 };
 
 
-// Add a shop item
-const addItem = async (req, res) => {
-    const chefId = req.params.chefId;
-    const { itemname, description, price, quantity = 0, unit = '' } = req.body;
-    const image = req.file ? req.file.path : ''; // Store the uploaded file path
-    // Validate required fields
-    if (!itemname || !description || price < 0 || quantity < 0 || !chefId) {
-        return res.status(400).json({ message: 'itemname, description, price, chefId, and quantity must be valid.' });
-    }
 
-    try {
-        const newItem = new Shop({
-            itemname,
-            description,
-            price,
-            image, // Set a default image if not provided
-            quantity,
-            unit,
-            chef: chefId
-        });
-
-        const savedItem = await newItem.save();
-        res.status(201).json({ message: 'Food item added successfully!', item: savedItem });
-    } catch (error) {
-        console.error('Error adding food item:', error);
-        res.status(500).json({ message: 'Error adding food item', error: error.message });
-    }
-};
 
 // Remove a shop item
 const removeItem = async (req, res) => {
@@ -101,17 +74,7 @@ const getItemByChef = async (req, res) => {
     }
 };
 
-// Get shop item by name
-const getItemByName = async (req, res) => {
-    try {
-        const item = await Shop.findOne({ itemname: req.params.name });
-        if (!item) return res.status(404).json({ message: 'Item not found' });
-        res.status(200).json(item);
-    } catch (error) {
-        console.error('Error fetching item by name:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
+
 
 // Add a shop item by chef ID
 const addItemByChefId = async (req, res) => {
@@ -122,13 +85,18 @@ const addItemByChefId = async (req, res) => {
         return res.status(400).json({ message: "Invalid input" });
     }
 
+// Get the uploaded image file path
+const imagePath = req.file ? `/shop-uploads/${req.file.filename}` : null;
+
+
+console.log(imagePath);
     try {
         const newItem = new Shop({
             chef: req.params.chefId,
             itemname,
             description,
             price,
-            image: image || 'default_image_url.png', // Set a default image URL if image is null
+            image:imagePath,// Set a default image URL if image is null
             quantity,
             unit,
         });
@@ -163,11 +131,11 @@ const updateItem = async (req, res) => {
 module.exports = {
     getItems,
     getItemById,
-    addItem,
+   
     upload,
     removeItem,
     getItemByChef,
-    getItemByName,
+   
     addItemByChefId,
     updateItem // Export the update function
 };
