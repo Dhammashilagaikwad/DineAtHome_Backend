@@ -73,7 +73,11 @@ exports.getCart = async (req, res) => {
         const userId = req.user._id || req.user.id;
         const cart = await Cart.findOne({ user: userId }).populate({
             path: 'items.item', // Populate 'item' field
-            select: 'itemname chefname price image', // Select required fields
+            populate: {
+                path: 'chef', // Assuming the 'chef' field references the Chef model
+                select: 'name image' // Replace with the actual fields you want
+            },
+            select: 'itemname name price image', // Select required fields
            
 
         });
