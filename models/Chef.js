@@ -10,6 +10,7 @@ const chefSchema = new mongoose.Schema({
     coverImage: { type: String, required: false }, // Field for cover image (Base64)
     cuisine: [{ type: String }],
     category: { type: String, required: false },
+    workTiming: { type: String, required: false },
     phone: { type: String, required: true },
     role: { type: String, required: false, default: "Chef" }, 
     specialities: [{ type: String }],

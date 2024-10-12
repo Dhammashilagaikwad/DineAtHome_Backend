@@ -26,7 +26,13 @@ router.post('/logout', logoutChef); // Chef logout
 router.delete('/delete-account', deleteAccount); // Delete account
 
 // Route to edit chef profile, including cover image upload
-router.put('/:id', uploadCoverImage.single('coverImage'),editChefProfile);
+router.put('/:id', 
+    uploadCoverImage.fields([
+        { name: 'coverImage', maxCount: 1 }, 
+        { name: 'profilePhoto', maxCount: 1 }
+    ]), 
+    editChefProfile
+);
 
 // Route to accept a pre-order
 router.put('/:id/preorder/accept',authenticateUser, acceptPreOrder); // Accept pre-order
