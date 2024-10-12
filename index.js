@@ -41,7 +41,7 @@ app.use(cookieParser());
 app.use(checkForAuthenticationCookie("token"));
 
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));//shop
+app.use('/shop-uploads', express.static(path.join(__dirname,'public', 'shop-uploads')));//shop
 app.use('/item-uploads', express.static(path.join(__dirname, 'public','item-uploads')));//menu items
 app.use('/coverImage-uploads', express.static(path.join(__dirname, 'public','coverImage-uploads')));//chef coverimage
 app.use('/profilephoto', express.static(path.join(__dirname, 'public','profilephoto')));//chef profilephoto
