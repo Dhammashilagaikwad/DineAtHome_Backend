@@ -291,6 +291,28 @@ const logoutChef = (req, res) => {
     res.status(200).json({ message: 'Logged out successfully' });
 };
 
+const updateStatus = async (req, res) => {
+    const { chefId } = req.params; // Extract chefId from request params
+    const { isActive } = req.body; // Expecting { isActive: true/false }
+
+    try {
+        const chef = await Chef.findByIdAndUpdate(
+            chefId,
+            { is_active: isActive }, // Ensure this matches your Mongoose schema
+            { new: true }
+        );
+
+        if (!chef) {
+            return res.status(404).json({ message: 'Chef not found' });
+        }
+
+        res.status(200).json({ message: 'Status updated successfully', chef });
+    } catch (error) {
+        console.error('Error updating status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 // Delete account controller
 const deleteAccount = async (req, res) => {
     const { email, password } = req.body;
@@ -341,6 +363,7 @@ module.exports = {
     logoutChef,        // Export logout function
     deleteAccount,
     acceptPreOrder,
+    updateStatus,
     declinePreOrder,
     getOrderHistory,
     uploadCoverImage,
