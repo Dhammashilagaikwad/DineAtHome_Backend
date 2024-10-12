@@ -151,7 +151,7 @@ const getMenuItemsForChef = async (req, res) => {
 const editChefProfile = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, cuisine, specialities, address1 } = req.body; // Add address1 to the destructuring
+        const { name, cuisine, specialities, address1, workTiming, category } = req.body; // Add address1 to the destructuring
         const trimmedId = id.trim();
 
         // Validate the trimmed ID
@@ -161,10 +161,18 @@ const editChefProfile = async (req, res) => {
 
         const updates = {};
 
-        // If req.file exists, add the coverImage to updates
-        if (req.file) {
-            updates.coverImage = req.file.filename;
+         // If req.file exists, add the coverImage to updates
+         if (req.files && req.files.coverImage) {
+            updates.coverImage = req.files.coverImage[0].filename; // Store cover image filename
         }
+
+
+           // Check if profilePhoto was uploaded
+           if (req.files && req.files.profilePhoto) {
+            updates.profilePhoto = req.files.profilePhoto[0].filename; // Save profile photo filename
+        }
+
+        if (name) updates.name = name;
 
  // Update cuisine if it's provided
  if (cuisine) {
@@ -180,6 +188,17 @@ const editChefProfile = async (req, res) => {
         if (address1) {
             updates.address1 = address1;
         }
+
+  // Update workTiming if it's provided
+  if (workTiming) {
+    updates.workTiming = workTiming;
+}
+
+// Update category if it's provided
+if (category) {
+    updates.category = category;
+}
+
 
         // Update the chef profile
         const updatedChef = await Chef.findByIdAndUpdate(trimmedId, updates, { new: true });
