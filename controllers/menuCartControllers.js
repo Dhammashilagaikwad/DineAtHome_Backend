@@ -53,25 +53,37 @@ const getUserMenuCart = async (req, res) => {
 
 // Remove item from menu cart
 const removeItemFromMenuCart = async (req, res) => {
-  const {  itemId } = req.body;
-  const userId = req.user._id || req.user.id;
+  console.log("Remove item endpoint hit");
+  console.log("Request body:", req.body);
+ 
+
+  const { itemId } = req.body;
+  const userId = req.user._id || req.user.id; // Ensure this is getting the correct user ID
 
   try {
-    let cart = await MenuCart.findOne({ userId });
+    // Check if the cart exists and pull the item from the array
+    const updatedCart = await MenuCart.findOneAndUpdate(
+      { userId }, // Match the user's cart
+      { $pull: { items: { _id: itemId } } }, // Pull the item by itemId (use _id of the item in the array)
+      { new: true } // Return the updated document
+    );
 
-    if (!cart) {
-      return res.status(404).json({ message: 'Cart not found' });
+    // If no cart was updated, the item was not found
+    if (!updatedCart) {
+      return res.status(404).json({ message: 'Cart not found or item not in cart.' });
     }
 
-    // Remove the item from the cart
-    cart.items = cart.items.filter(item => item.itemId.toString() !== itemId);
-
-    await cart.save();
-    res.status(200).json(cart);
+    console.log("Updated Cart After Deletion:", updatedCart); // Log the updated cart
+    res.status(200).json(updatedCart); // Respond with the updated cart
   } catch (error) {
-    res.status(500).json({ message: 'Error removing item from menu cart', error });
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred while removing the item.' });
   }
 };
+
+
+
+
 
 module.exports = {
   addItemToMenuCart,

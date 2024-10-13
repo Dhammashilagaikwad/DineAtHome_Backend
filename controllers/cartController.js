@@ -129,36 +129,24 @@ exports.updateCartItem = async (req, res) => {
 
 // Remove item from cart
 exports.removeItemFromCart = async (req, res) => {
+    console.log("ItemId:", req.params.itemId); // Log itemId for verification
     try {
         const { itemId } = req.params;
-        const userId = req.user._id || req.user.id;
-
-        const cart = await Cart.findOne({ user: userId });
-        if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
+    
+        // Perform the deletion
+        const result = await Cart.findOneAndUpdate(
+          { 'items._id': itemId }, // Find the cart containing this item
+          { $pull: { items: { _id: itemId } } }, // Remove the item
+          { new: true }
+        );
+    
+        if (!result) {
+          return res.status(404).json({ message: 'Item not found' });
         }
+    
+        return res.status(200).json({ message: 'Item removed successfully', cart: result });
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+      }};
 
-        const itemIndex = cart.items.findIndex(i => i.item.toString() === itemId);
-        if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Item not found in cart' });
-        }
-
-        const item = await Shop.findById(itemId);
-        if (!item) {
-            return res.status(404).json({ message: 'Item not found' });
-        }
-
-        cart.totalPrice -= cart.items[itemIndex].quantity * item.price; // Deduct item price
-        cart.items.splice(itemIndex, 1); // Remove item
-
-        // Recalculate total price
-        cart.totalPrice = calculateTotalPrice(cart.items, await Shop.find({_id: { $in: cart.items.map(i => i.item) }}));
-
-        await cart.save();
-
-        res.status(200).json({ message: 'Item removed from cart', cart });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error', error });
-    }
-};

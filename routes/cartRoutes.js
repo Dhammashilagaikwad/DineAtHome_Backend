@@ -12,7 +12,10 @@ router.get('/getallitems', authenticateUser, cartController.getCart);
 // Update item in cart (PUT /cart/updateItem)
 router.put('/updateItem', authenticateUser, cartController.updateCartItem);
 
-// Delete item from cart (DELETE /cart/removeItem/:itemId)
-router.delete('/removeItem/:itemId', authenticateUser, cartController.removeItemFromCart);
+router.delete('/removeItem/:itemId', authenticateUser, (req, res, next) => {
+    console.log("ItemId:", req.params.itemId);
+    next();
+ }, cartController.removeItemFromCart);
+ 
 
 module.exports = router;
