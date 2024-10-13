@@ -110,6 +110,7 @@ console.log(imagePath);
 };
 
 // Update a shop item by ID
+// Update a shop item by ID
 const updateItem = async (req, res) => {
     const { itemname, description, price, image, quantity, unit } = req.body;
 
@@ -120,7 +121,9 @@ const updateItem = async (req, res) => {
             { new: true } // Return the updated document
         );
 
-        if (!updatedItem) return res.status(404).json({ message: 'Item not found' });
+        if (!updatedItem) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
         res.status(200).json({ message: 'Item updated successfully', item: updatedItem });
     } catch (error) {
         console.error('Error updating item:', error);
