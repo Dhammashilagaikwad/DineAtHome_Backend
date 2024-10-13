@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateUser } = require('../services/authentication');
-const { getChefs, addChef, getChefById, getMenuItemsForChef, signUpChef, loginChef, editChefProfile, logoutChef, deleteAccount ,uploadCoverImage,acceptPreOrder,declinePreOrder,getOrderHistory} = require('../controllers/chefController');
+const { getChefs, addChef, getChefById,updateStatus, getMenuItemsForChef, signUpChef, loginChef, editChefProfile, logoutChef, deleteAccount ,uploadCoverImage,acceptPreOrder,declinePreOrder,getOrderHistory} = require('../controllers/chefController');
 
 // Define routes
 router.get('/', getChefs); // Get all chefs
@@ -42,6 +42,10 @@ router.put('/:id/preorder/decline', declinePreOrder); // Decline pre-order
 
 // Route in chefRoutes.js
 router.get('/:id/order-history', getOrderHistory); // Get chef's order history
+
+// Route to update chef's online/offline status
+router.put('/status/:id', authenticateUser, updateStatus); // Assuming authenticateUser middleware checks for the valid token
+
 
 
 module.exports = router;
