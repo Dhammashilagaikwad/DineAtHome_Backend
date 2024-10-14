@@ -31,8 +31,9 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: 'https://dineathome.vercel.app', // Update with your frontend's URL
-  credentials: true // Allow credentials if you are using cookies
+  origin: 'https://dineathome.vercel.app', 
+  methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH'],
+  credentials: true 
 }));
 app.use(bodyParser.json());
 app.use(express.json());
