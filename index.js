@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const config = require('./config/config');
 const bodyParser = require('body-parser');
 const { checkForAuthenticationCookie } = require('./middlewares/authentication');
+require('dotenv').config();
 
 // Import your routes
 const contactRoutes = require('./routes/contactRoutes');
@@ -23,17 +24,32 @@ const shopRoutes = require('./routes/shopRoutes');
 const authRoutes = require("./routes/authRoutes");
 const cartRoutes = require('./routes/cartRoutes');
 const menuCartRoutes = require('./routes/menuCartRoutes');
+const paymentsRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
 // Connect to the database
 connectDB();
 
+const allowedOrigins = [
+  process.env.LOCAL_URL,  // Localhost (development)
+  process.env.PROD_URL    // Deployed site (production)
+];
 // Middleware
 app.use(cors({
-  origin: 'https://dineathome.vercel.app', // Update with your frontend's URL
-  credentials: true // Allow credentials if you are using cookies
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH'],
+  credentials: true
 }));
+
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,9 +85,12 @@ app.use('/api/shop', shopRoutes);
 app.use('/api/', authRoutes);
 app.use('/api/cart', cartRoutes)
 app.use('/api/menuCart', menuCartRoutes);
+app.use('/api/payments', paymentsRoutes); // Include payment routes
 
 // Start the server using the port from config
-const PORT = config.port || 4000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => 
+  console.log(`Server is running on port ${PORT}`));
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 
 
