@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const razorpay = require('../config/razorpay-config');
 const config = require('dotenv');
 const mongoose = require('mongoose');
+const MenuCart = require('../models/menuCartModel');
+const Cart = require('../models/cartModel');
 
 config.config({ path: './.env' });
 console.log(process.env.RAZORPAY_API_KEY);
@@ -75,4 +77,22 @@ const processPayment = async (req, res) => {
   };
   
 
-module.exports = { getKey, createOrder, processPayment };
+  // In your cart controller
+const clearCartAfterPayment = async (req, res) => {
+  try {
+    console.log("requst user",req.user); // Log the user info for debugging
+    const userId = req.user._id || req.user.id; // Assuming you have user authentication
+
+    // Clear both menu and shop cart items
+    await MenuCart.deleteMany({ userId });
+    await Cart.deleteMany({ userId });
+
+    res.status(200).json({ message: "Cart cleared successfully after payment" });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ message: "Error clearing the cart", error });
+  }
+};
+
+
+module.exports = { getKey, createOrder, processPayment,clearCartAfterPayment };

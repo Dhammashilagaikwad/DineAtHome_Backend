@@ -15,12 +15,14 @@ const getPreOrder = async (req, res) => {
       // If the request is for a user, find pre-orders by userId
       preOrders = await PreOrderFood.find({ userId })
         .populate('userId', 'username email') // Populate userId with selected fields from User
-        .populate('chefId', 'name experience');
+        .populate('chefId', 'name experience')
+        .select('name description quantity price deliveryDate'); // Include price
     } else if (req.user.role === 'chef') {
       // If the request is for a chef, find pre-orders by chefId
       preOrders = await PreOrderFood.find({ chefId })
         .populate('userId', 'username email') // Populate userId with selected fields from User
-        .populate('chefId', 'name experience');
+        .populate('chefId', 'name experience')
+        .select('name description quantity price deliveryDate'); // Include price
     }
 
     // If no pre-orders are found, return an appropriate message
