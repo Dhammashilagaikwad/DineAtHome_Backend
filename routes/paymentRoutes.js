@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { createOrder, processPayment, getKey , clearCartAfterPayment} = require('../controllers/paymentController');
+const { createOrder, processPayment, getKey , clearCartAfterPayment } = require('../controllers/paymentController');
 const router = Router();
 const { authenticateUser } = require('../services/authentication');
 // Create Order Route

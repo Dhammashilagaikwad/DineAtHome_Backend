@@ -35,6 +35,11 @@ const paymentSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+   orderId: { // Add this line
+    type: mongoose.Schema.Types.ObjectId,
+    required: false,
+    ref: 'Order', // Reference to the Order model
+  },
   createdAt: {
     type: Date,
     default: Date.now,
